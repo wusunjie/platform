@@ -59,12 +59,36 @@ void psense_tick(void)
 						}
 					}
 					else {
+						if (sense_ctrl[i].param.long_press) {
+							sense_ctrl[i].count++;
+							if (sense_ctrl[i].count > sense_ctrl[i].param.long_press) {
+								sense_ctrl[i].status = 2;
+								sense_ctrl[i].count = 0;
+							}
+						}
+						else {
+							sense_ctrl[i].count = 0;
+						}
+					}
+				}
+			}
+			break;
+			case 2:
+			{
+				if (port_read_func_ptr) {
+					if (!port_read_func_ptr(sense_ctrl[i].param.tag)) {
+						sense_ctrl[i].count++;
+						if (sense_ctrl[i].count > sense_ctrl[i].param.post_filter) {
+							sense_ctrl[i].status = 0;
+							sense_ctrl[i].count = 0;
+						}
+					}
+					else {
 						sense_ctrl[i].count = 0;
 					}
 				}
 			}
 			break;
-			default:
 			break;
 		}
 	}
@@ -74,7 +98,7 @@ int psense_read(unsigned char tag)
 {
 	for (int i = 0; i < sense_size; i++) {
 		if (tag == sense_ctrl[i].param.tag) {
-			return sense_ctrl[i].status;
+			return (int)sense_ctrl[i].status;
 		}
 	}
 	return -1;

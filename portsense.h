@@ -1,7 +1,14 @@
+enum psense_status {
+	PSENSE_STATUS_UP,
+	PSENSE_STATUS_DOWN,
+	PSENSE_STATUS_LONG,
+};
+
 struct psense_param {
+	unsigned char tag;
 	unsigned int prev_filter;
 	unsigned int post_filter;
-	unsigned char tag;
+	unsigned int long_press;
 };
 
 typedef int (*port_read_func)(unsigned char tag);
