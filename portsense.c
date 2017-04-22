@@ -19,7 +19,7 @@ int psense_init(struct psense_param *param, int size, port_read_func func)
 	}
 	for (int i = 0; i < size; i++) {
 		sense_ctrl[i].param = param[i];
-		sense_ctrl[i].status = 0;
+		sense_ctrl[i].status = PSENSE_STATUS_UP;
 		sense_ctrl[i].count = 0;
 	}
 	port_read_func_ptr = func;
@@ -31,13 +31,13 @@ void psense_dowork(void)
 {
 	for (int i = 0; i < sense_size; i++) {
 		switch (sense_ctrl[i].status) {
-			case 0:
+			case PSENSE_STATUS_UP:
 			{
 				if (port_read_func_ptr) {
 					if (port_read_func_ptr(sense_ctrl[i].param.tag)) {
 						sense_ctrl[i].count++;
 						if (sense_ctrl[i].count > sense_ctrl[i].param.prev_filter) {
-							sense_ctrl[i].status = 1;
+							sense_ctrl[i].status = PSENSE_STATUS_DOWN;
 							sense_ctrl[i].count = 0;
 						}
 					}
@@ -47,13 +47,13 @@ void psense_dowork(void)
 				}
 			}
 			break;
-			case 1:
+			case PSENSE_STATUS_DOWN:
 			{
 				if (port_read_func_ptr) {
 					if (!port_read_func_ptr(sense_ctrl[i].param.tag)) {
 						sense_ctrl[i].count++;
 						if (sense_ctrl[i].count > sense_ctrl[i].param.post_filter) {
-							sense_ctrl[i].status = 0;
+							sense_ctrl[i].status = PSENSE_STATUS_UP;
 							sense_ctrl[i].count = 0;
 						}
 					}
@@ -61,7 +61,7 @@ void psense_dowork(void)
 						if (sense_ctrl[i].param.long_press) {
 							sense_ctrl[i].count++;
 							if (sense_ctrl[i].count > sense_ctrl[i].param.long_press) {
-								sense_ctrl[i].status = 2;
+								sense_ctrl[i].status = PSENSE_STATUS_LONG;
 								sense_ctrl[i].count = 0;
 							}
 						}
@@ -72,13 +72,13 @@ void psense_dowork(void)
 				}
 			}
 			break;
-			case 2:
+			case PSENSE_STATUS_LONG:
 			{
 				if (port_read_func_ptr) {
 					if (!port_read_func_ptr(sense_ctrl[i].param.tag)) {
 						sense_ctrl[i].count++;
 						if (sense_ctrl[i].count > sense_ctrl[i].param.post_filter) {
-							sense_ctrl[i].status = 0;
+							sense_ctrl[i].status = PSENSE_STATUS_UP;
 							sense_ctrl[i].count = 0;
 						}
 					}
