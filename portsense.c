@@ -1,7 +1,6 @@
 #include "portsense.h"
 
-
-#define PSENSE_MAX 256
+#include "config.h"
 
 struct psense_ctrl {
 	struct psense_param param;
@@ -10,12 +9,12 @@ struct psense_ctrl {
 };
 
 static port_read_func port_read_func_ptr = 0;
-static struct psense_ctrl sense_ctrl[PSENSE_MAX];
+static struct psense_ctrl sense_ctrl[PSENSE_SIZE_MAX];
 static int sense_size = 0;
 
 int psense_init(struct psense_param *param, int size, port_read_func func)
 {
-	if (size > PSENSE_MAX) {
+	if (size > PSENSE_SIZE_MAX) {
 		return -1;
 	}
 	for (int i = 0; i < size; i++){
@@ -89,12 +88,13 @@ void psense_tick(void)
 				}
 			}
 			break;
+			default:
 			break;
 		}
 	}
 }
 
-int psense_read(unsigned char tag)
+int psense_read(unsigned int tag)
 {
 	for (int i = 0; i < sense_size; i++) {
 		if (tag == sense_ctrl[i].param.tag) {
