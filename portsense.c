@@ -17,7 +17,7 @@ int psense_init(struct psense_param *param, int size, port_read_func func)
 	if (size > PSENSE_SIZE_MAX) {
 		return -1;
 	}
-	for (int i = 0; i < size; i++){
+	for (int i = 0; i < size; i++) {
 		sense_ctrl[i].param = param[i];
 		sense_ctrl[i].status = 0;
 		sense_ctrl[i].count = 0;
