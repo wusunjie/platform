@@ -22,7 +22,7 @@ typedef int (*port_read_func)(unsigned int tag);
 
 extern int psense_init(struct psense_param *param, int size, port_read_func func);
 
-extern void psense_tick(void);
+extern void psense_dowork(void);
 
 extern int psense_read(unsigned int tag);
 

@@ -27,7 +27,7 @@ int psense_init(struct psense_param *param, int size, port_read_func func)
 	return 0;
 }
 
-void psense_tick(void)
+void psense_dowork(void)
 {
 	for (int i = 0; i < sense_size; i++) {
 		switch (sense_ctrl[i].status) {
