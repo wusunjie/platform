@@ -5,4 +5,8 @@
 	#define PSENSE_SIZE_MAX 256
 #endif
 
+#ifndef TIMER_SIZE_MAX
+	#define TIMER_SIZE_MAX 10
+#endif
+
 #endif
