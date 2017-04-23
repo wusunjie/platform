@@ -47,6 +47,9 @@ struct timer_ctrl *timer_create(void)
 
 int timer_start(struct timer_ctrl *ctrl, unsigned int delay, unsigned int period, unsigned char repeat)
 {
+	if (!ctrl) {
+		return -1;
+	}
 	if (!ctrl->used) {
 		return -1;
 	}
@@ -63,7 +66,7 @@ int timer_start(struct timer_ctrl *ctrl, unsigned int delay, unsigned int period
 
 enum timer_status timer_check(struct timer_ctrl *ctrl)
 {
-	if (!ctrl->used || !ctrl->current) {
+	if (!ctrl || !ctrl->used || !ctrl->current) {
 		return TIMER_STATUS_NOT_RUNNING;
 	}
 	if (timer_jiffies < ctrl->current + ctrl->delay) {
@@ -84,10 +87,14 @@ enum timer_status timer_check(struct timer_ctrl *ctrl)
 
 void timer_stop(struct timer_ctrl *ctrl)
 {
-	ctrl->current = 0;
+	if (ctrl) {
+		ctrl->current = 0;
+	}
 }
 
 void timer_destory(struct timer_ctrl *ctrl)
 {
-	ctrl->used = 0;
+	if (ctrl) {
+		ctrl->used = 0;
+	}
 }
