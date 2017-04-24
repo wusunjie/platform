@@ -13,12 +13,6 @@ struct blink_status {
 	struct timer_ctrl *timer;
 };
 
-static struct blink_status status = {
-	0, 0,
-	{0, 0},
-	0,
-};
-
 static struct psense_param params = {
 	ACC_SENSE,
 	10,
@@ -61,30 +55,48 @@ void hw_init(void)
 	/* setup_timer(); */
 }
 
-int main(void)
+void blink_init(struct blink_status *status)
 {
-	sw_init();
-	hw_init();
-	
-	while (1) {
-		
-		if (PSENSE_STATUS_LONG == psense_read(ACC_SENSE)) {
-			ringbuffer_write(&write_buf, (unsigned char *)"Hello World", 11);
-			status.sent = 1;
+	status->sent = status->read_count = status->timer = 0;
+	status->buf[0] = status->buf[1] = 0;
+}
+
+void blink_fsm(struct blink_status *status)
+{
+	if (PSENSE_STATUS_LONG == psense_read(ACC_SENSE)) {
+		ringbuffer_write(&write_buf, (unsigned char *)"Hello World", 11);
+		status->sent = 1;
+	}
+	if (status->timer) {
+		if (TIMER_STATUS_FIRED == timer_check(status->timer)) {
+			/* blink finished */
+			timer_destory(status->timer);
 		}
-		if (status.sent) {
-			status.read_count += ringbuffer_read(&read_buf, status.buf + status.read_count, 2);
-			if (2 == status.read_count) {
-				if ((status.buf[0] == 'O') && (status.buf[1] == 'K')) {
-					status.timer = timer_create();
-					timer_start(status.timer, 0, 30, 0);
+	}
+	else {
+		if (status->sent) {
+			status->ead_count += ringbuffer_read(&read_buf, status->buf + status->read_count, 2);
+			if (2 == status->read_count) {
+				if ((status->buf[0] == 'O') && (status->buf[1] == 'K')) {
+					status->timer = timer_create();
+					timer_start(status->timer, 0, 30, 0);
 				}
 			}
 		}
-		if (TIMER_STATUS_FIRED == timer_check(status.timer)) {
-			/* blink finished */
-			timer_destory(status.timer);
-		}
+	}
+}
+
+int main(void)
+{
+	struct blink_status status;
+	
+	sw_init();
+	hw_init();
+
+	blink_init(&status);
+	
+	while (1) {
+		blink_fsm(&status);
 	}
 	return 0;
 }
