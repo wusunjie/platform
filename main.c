@@ -75,8 +75,9 @@ void blink_fsm(struct blink_status *status)
 	}
 	else {
 		if (status->sent) {
-			status->ead_count += ringbuffer_read(&read_buf, status->buf + status->read_count, 2);
+			status->read_count += ringbuffer_read(&read_buf, status->buf + status->read_count, 2);
 			if (2 == status->read_count) {
+				status->read_count = 0;
 				if ((status->buf[0] == 'O') && (status->buf[1] == 'K')) {
 					status->timer = timer_create();
 					timer_start(status->timer, 0, 30, 0);
