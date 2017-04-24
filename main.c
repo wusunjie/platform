@@ -71,6 +71,8 @@ void blink_fsm(struct blink_status *status)
 		if (TIMER_STATUS_FIRED == timer_check(status->timer)) {
 			/* blink finished */
 			timer_destory(status->timer);
+			status->timer = 0;
+			status->sent = 0;
 		}
 	}
 	else {
